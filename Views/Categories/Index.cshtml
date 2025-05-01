@@ -1,0 +1,28 @@
+@using Construction_Expert.Models
+@model IReadOnlyList<CategoryNode>
+
+@functions {
+    void RenderTree(IEnumerable<CategoryNode> nodes)
+    {
+        <ul>
+            @foreach (var n in nodes)
+            {
+                <li>
+                    @n.Code - @n.Name
+                    @if (n.Children.Any())
+                    {
+                        RenderTree(n.Children);
+                    }
+                </li>
+            }
+        </ul>
+    }
+}
+
+<h2>Categories</h2>
+
+@{
+    RenderTree(Model);
+}
+
+<a class="btn btn-primary" href="/Categories/Create">New Category</a>
