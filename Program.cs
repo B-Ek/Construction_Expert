@@ -1,4 +1,4 @@
-using Construction_Expert.Service;
+using Construction_Expert.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

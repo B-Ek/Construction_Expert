@@ -1,50 +1,65 @@
-using Construction_Expert.Service;
+using Construction_Expert.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using Construction_Expert.Models;
 
-public class CategoriesController : Controller
+namespace Construction_Expert.Controllers
 {
-    private readonly ICategoryService _svc;
-
-    public CategoriesController(ICategoryService svc)
+    public class CategoriesController : Controller
     {
-        _svc = svc;
-    }
+        private readonly ICategoryService _svc;
 
-    public async Task<IActionResult> Index()
-    {
-        var tree = await _svc.GetTreeAsync();
-        return View(tree);
-    }
-
-    public async Task<IActionResult> Create()
-    {
-        var model = new ConstructionCategory
+        public CategoriesController(ICategoryService svc)
         {
-            Code = await _svc.NextCodeAsync()
-        };
+            _svc = svc;
+        }
 
-        ViewBag.Categories = await _svc.GetAllCategoriesAsync();
-        ViewBag.AreaList = await _svc.GetAreaSelectListAsync();
-
-        return View(model);
-    }
-
-
-    [HttpPost]
-    public async Task<IActionResult> Create(ConstructionCategory model, Guid? parentId)
-    {
-        if (!ModelState.IsValid)
+        public async Task<IActionResult> Index()
         {
+            var tree = await _svc.GetTreeAsync();
+            return View(tree);
+        }
+
+        public async Task<IActionResult> Create(Guid? parentId)
+        {
+            var model = new ConstructionCategory
+            {
+                Code = await _svc.NextCodeAsync(),
+                IsRoot = !parentId.HasValue
+            };
+
+            ViewBag.ParentId = parentId;
             ViewBag.Categories = await _svc.GetAllCategoriesAsync();
             ViewBag.AreaList = await _svc.GetAreaSelectListAsync();
             return View(model);
         }
 
-        await _svc.CreateCategoryAsync(model, parentId);
-        return RedirectToAction(nameof(Index));
-    }
 
+
+        [HttpPost]
+        public async Task<IActionResult> Create(ConstructionCategory model, Guid? parentId)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Categories = await _svc.GetAllCategoriesAsync();
+                ViewBag.AreaList = await _svc.GetAreaSelectListAsync();
+                return View(model);
+            }
+
+            await _svc.CreateCategoryAsync(model, parentId);
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Hierarchy()
+        {
+            var tree = await _svc.GetFlatTreeAsync();
+            return View(tree);
+        }
+
+
+
+
+    }
 }
+
