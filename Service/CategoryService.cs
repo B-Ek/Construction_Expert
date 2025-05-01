@@ -30,10 +30,8 @@ public class CategoryService : ICategoryService
                             .Include(c => c.ChildRelations)
                             .ToListAsync();
 
-        // Bucket oluþtur
         var buckets = cats.ToDictionary(c => c.Id, c => new List<CategoryNode>());
 
-        // Relations tablosundan doðru þekilde kullaným
         var relations = await _db.ConstructionCategoryRelations.ToListAsync();
         foreach (var rel in relations)
         {
@@ -62,11 +60,9 @@ public class CategoryService : ICategoryService
 
     public async Task CreateCategoryAsync(ConstructionCategory category, Guid? parentId)
     {
-        // Id & Code üretimi
         category.Id = Guid.NewGuid();
         category.Code = await NextCodeAsync();
 
-        // IsRoot / IsLeaf iþ kuralý
         category.IsRoot = !parentId.HasValue;
         category.IsLeaf = true;
 
@@ -74,7 +70,6 @@ public class CategoryService : ICategoryService
 
         if (parentId.HasValue)
         {
-            // Parent iliþki kaydý
             await _db.ConstructionCategoryRelations.AddAsync(new ConstructionCategoryRelation
             {
                 Id = Guid.NewGuid(),
@@ -83,7 +78,6 @@ public class CategoryService : ICategoryService
                 Priority = 0
             });
 
-            // Parent kategorinin artýk yaprak olmamasý lazým
             var parentCat = await _db.ConstructionCategories.FindAsync(parentId.Value);
             if (parentCat != null && parentCat.IsLeaf)
             {
