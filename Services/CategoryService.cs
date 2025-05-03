@@ -57,7 +57,7 @@ namespace Construction_Expert.Services
         public async Task<SelectList> GetAreaSelectListAsync()
         {
             var areas = await _db.ConstructionAreas.OrderBy(a => a.Name).ToListAsync();
-            return new SelectList(areas, "Id", "Name");
+            return new SelectList(areas, "Id", "Id");
         }
 
         public async Task CreateCategoryAsync(ConstructionCategory category, Guid? parentId)
