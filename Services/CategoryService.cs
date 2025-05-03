@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Construction_Expert.Models;
-using Construction_Expert.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
@@ -128,7 +127,9 @@ namespace Construction_Expert.Services
             var lookup = rels.GroupBy(r => r.ParentCategoryId)
                              .ToDictionary(
                                  g => g.Key,
-                                 g => g.Select(r => cats.First(c => c.Id == r.CategoryId)).ToList()
+                                 g => g.Select(r => cats.First(c => c.Id == r.CategoryId))
+                                       .OrderBy(c => c.Code)
+                                       .ToList()
                              );
 
             List<CatPath> paths = [];

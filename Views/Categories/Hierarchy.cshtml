@@ -6,6 +6,7 @@
 @{
     ViewBag.Title = "Kategori Hiyerarşisi";
     int maxLevel = Model.Any() ? Model.Max(p => p.Nodes.Count) : 0;
+    var spanLeft = new Dictionary<Guid, int>();
 }
 
 <h3 class="mb-3">Kategori Ağaç Yapısı</h3>
@@ -21,52 +22,49 @@
         </tr>
     </thead>
     <tbody>
-        @{
-            var spanLeft = new Dictionary<Guid, int>();
-
-            foreach (var path in Model)
-            {
-                <tr>
-                    @{
-                        for (int lvl = 0; lvl < maxLevel; lvl++)
+        @foreach (var path in Model)
+        {
+            <tr>
+                @{
+                    for (int lvl = 0; lvl < maxLevel; lvl++)
+                    {
+                        if (lvl < path.Nodes.Count)
                         {
-                            if (lvl < path.Nodes.Count)
+                            var cat = path.Nodes[lvl];
+
+                            if (spanLeft.TryGetValue(cat.Id, out int left) && left > 0)
                             {
-                                var cat = path.Nodes[lvl];
-
-                                if (spanLeft.TryGetValue(cat.Id, out int left) && left > 0)
-                                {
-                                    spanLeft[cat.Id] = left - 1;
-                                }
-                                else
-                                {
-                                    int rowspan = Model.Count(p =>
-                                    p.Nodes.Count > lvl &&
-                                    p.Nodes[lvl].Id == cat.Id);
-
-                                    if (rowspan > 1)
-                                        spanLeft[cat.Id] = rowspan - 1;
-
-                                    <td @(rowspan > 1 ? $"rowspan=\"{rowspan}\"" : "")>
-                                        @cat.Name - @cat.Code
-                                    </td>
-                                }
+                                spanLeft[cat.Id] = left - 1;
+                                <td></td>
                             }
                             else
                             {
-                                <td></td>
+                                int rowspan = Model.Count(p =>
+                                p.Nodes.Count > lvl &&
+                                p.Nodes[lvl].Id == cat.Id);
+
+                                if (rowspan > 1)
+                                    spanLeft[cat.Id] = rowspan - 1;
+
+                                <td @(rowspan > 1 ? $"rowspan=\"{rowspan}\"" : "")>
+                                    @cat.Name - @cat.Code
+                                </td>
                             }
                         }
+                        else
+                        {
+                            <td></td>
+                        }
                     }
-                    <td>
-                        <a asp-action="Create"
-                           asp-route-parentId="@path.Nodes.Last().Id"
-                           class="btn btn-sm btn-primary">
-                            Alt Ekle
-                        </a>
-                    </td>
-                </tr>
-            }
+                }
+                <td>
+                    <a asp-action="Create"
+                       asp-route-parentId="@path.Nodes.Last().Id"
+                       class="btn btn-sm btn-primary">
+                        Alt Ekle
+                    </a>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
