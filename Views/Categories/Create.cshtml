@@ -12,11 +12,11 @@
 
     <div class="row">
         <div class="col-md-6 mb-3">
-            <label asp-for="Code">Code</label>
+            <label asp-for="Code">Kod</label>
             <input asp-for="Code" class="form-control" readonly />
         </div>
         <div class="col-md-6 mb-3">
-            <label asp-for="Name">Name</label>
+            <label asp-for="Name">Ýsim</label>
             <input asp-for="Name" class="form-control" required />
             <div class="invalid-feedback">
                 Name zorunludur.
@@ -25,21 +25,21 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="Description">Description</label>
+        <label asp-for="Description">Açýklama</label>
         <textarea asp-for="Description" class="form-control" rows="3"></textarea>
     </div>
     <div class="container">
         <div class="row">
             <div class="col-6">
-                    <label asp-for="AreaId">Area</label>
+                <label asp-for="AreaId">Alan</label>
                     <select asp-for="AreaId"
                             asp-items="(SelectList)ViewBag.AreaList"
                             class="custom-select d-block w-100"
                             required>
-                        <option value="">Choose...</option>
+                        <option value="">Seçiniz...</option>
                     </select>
                     <div class="invalid-feedback">
-                        Area zorunludur.
+                        Alan zorunludur.
                     </div>
             </div>
 
@@ -50,13 +50,13 @@
                         <input asp-for="IsRoot"
                                class="custom-control-input"
                                id="IsRoot" />
-                        <label class="custom-control-label" for="IsRoot">Is Root</label>
+                        <label class="custom-control-label" for="IsRoot">Root</label>
                     </div>
                     <div class="custom-control custom-checkbox">
                         <input asp-for="IsLeaf"
                                class="custom-control-input"
                                id="IsLeaf" />
-                        <label class="custom-control-label" for="IsLeaf">Is Leaf</label>
+                        <label class="custom-control-label" for="IsLeaf">Leaf</label>
                     </div>
                 </div>
             </div>
@@ -64,23 +64,15 @@
         </div>
 
     </div>
-
-       
-  
-
-    <div class="row">
-        <div class="col-md-5 mb-3">
-            <label for="parentId">Parent Category (optional)</label>
+            <label for="parentId">Parent Kategorisi (opsiyonel)</label>
             <select id="parentId" name="parentId"
                     class="custom-select d-block w-100">
-                <option value="">Choose...</option>
+                <option value="">Seçiniz...</option>
                 @foreach (var c in (List<ConstructionCategory>)ViewBag.Categories)
                 {
                     <option value="@c.Id">@c.Code - @c.Name</option>
                 }
             </select>
-        </div>
-    </div>
 
     <hr class="mb-4" />
     <button class="btn btn-primary btn-lg btn-block" type="submit">
