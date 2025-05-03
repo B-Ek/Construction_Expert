@@ -3,95 +3,118 @@
 @using Construction_Expert.Models
 
 @{
-    ViewBag.Title = "New Category";
+    ViewBag.Title = "Yeni Kategori";
 }
 
-<h2 class="mb-4">Yeni Kategori</h2>
-
-<form asp-action="Create" method="post" class="w-50 mx-auto">
+<h4 class="mb-3">Yeni Kategori</h4>
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
     <input type="hidden" asp-for="Id" />
 
-    <div class="mb-3">
-        <label asp-for="Code" class="form-label">Code</label>
-        <input asp-for="Code" class="form-control" readonly />
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="Code">Code</label>
+            <input asp-for="Code" class="form-control" readonly />
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Name">Name</label>
+            <input asp-for="Name" class="form-control" required />
+            <div class="invalid-feedback">
+                Name zorunludur.
+            </div>
+        </div>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Name" class="form-label">Name</label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="AreaId" class="form-label">Area</label>
-        <select asp-for="AreaId" asp-items="(SelectList)ViewBag.AreaList" class="form-select" required>
-            <option value="">-- Select Area --</option>
-        </select>
-        <span asp-validation-for="AreaId" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Description" class="form-label">Description</label>
+        <label asp-for="Description">Description</label>
         <textarea asp-for="Description" class="form-control" rows="3"></textarea>
     </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                    <label asp-for="AreaId">Area</label>
+                    <select asp-for="AreaId"
+                            asp-items="(SelectList)ViewBag.AreaList"
+                            class="custom-select d-block w-100"
+                            required>
+                        <option value="">Choose...</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Area zorunludur.
+                    </div>
+            </div>
 
-    <div class="form-check mb-2">
-        <input asp-for="IsRoot" class="form-check-input" />
-        <label asp-for="IsRoot" class="form-check-label"></label>
+            <div class="col-6">
+                <label asp-for="ParentRelations">Parent</label>
+                <div class="d-block my-3">
+                    <div class="custom-control custom-checkbox">
+                        <input asp-for="IsRoot"
+                               class="custom-control-input"
+                               id="IsRoot" />
+                        <label class="custom-control-label" for="IsRoot">Is Root</label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input asp-for="IsLeaf"
+                               class="custom-control-input"
+                               id="IsLeaf" />
+                        <label class="custom-control-label" for="IsLeaf">Is Leaf</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="form-check mb-3">
-        <input asp-for="IsLeaf" class="form-check-input" />
-        <label asp-for="IsLeaf" class="form-check-label"></label>
+       
+  
+
+    <div class="row">
+        <div class="col-md-5 mb-3">
+            <label for="parentId">Parent Category (optional)</label>
+            <select id="parentId" name="parentId"
+                    class="custom-select d-block w-100">
+                <option value="">Choose...</option>
+                @foreach (var c in (List<ConstructionCategory>)ViewBag.Categories)
+                {
+                    <option value="@c.Id">@c.Code - @c.Name</option>
+                }
+            </select>
+        </div>
     </div>
 
-    <div class="mb-4">
-        <label for="parentId" class="form-label">Parent Category (optional)</label>
-        <select id="parentId" name="parentId" class="form-select">
-            <option value="">-- root --</option>
-            @foreach (var c in (List<Construction_Expert.Models.ConstructionCategory>)ViewBag.Categories)
-            {
-                <option value="@c.Id">@c.Code - @c.Name</option>
-            }
-        </select>
-    </div>
-
-    <div class="d-flex justify-content-between">
-        <button type="submit" class="btn btn-success">Kaydet</button>
-        <a asp-action="Index" class="btn btn-secondary">Ýptal</a>
-    </div>
+    <hr class="mb-4" />
+    <button class="btn btn-primary btn-lg btn-block" type="submit">
+        Kaydet
+    </button>
 </form>
-
-<div class="mt-4 text-end">
-    <a asp-action="Hierarchy" class="btn btn-outline-info">
-        <i class="bi bi-diagram-3"></i> Yapýyý Görüntüle
-    </a>
-</div>
-
 
 @section Scripts {
     <script>
         (function () {
-            const root = document.getElementById('IsRoot');
-            const leaf = document.getElementById('IsLeaf');
+            'use strict';
+            window.addEventListener('load', function () {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
 
-            function ensureOnlyOneChecked(changed, other) {
-                if (changed.checked) {
-                    other.checked = false;
-                }
+        (function () {
+            const root = document.getElementById('IsRoot'),
+                  leaf = document.getElementById('IsLeaf');
+            function ensureOnlyOneChecked(a, b) {
+                if (a.checked) b.checked = false;
             }
-
-            if (root.checked && leaf.checked) {
-                leaf.checked = false;
-            }
-
-            root.addEventListener('change', function () {
-                ensureOnlyOneChecked(root, leaf);
-            });
-
-            leaf.addEventListener('change', function () {
-                ensureOnlyOneChecked(leaf, root);
-            });
+            if (root.checked && leaf.checked) leaf.checked = false;
+            root.addEventListener('change', () => ensureOnlyOneChecked(root, leaf));
+            leaf.addEventListener('change', () => ensureOnlyOneChecked(leaf, root));
         })();
     </script>
 }

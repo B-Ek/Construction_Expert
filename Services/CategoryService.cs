@@ -48,7 +48,6 @@ namespace Construction_Expert.Services
                        .ToList();
         }
 
-
         public async Task<List<ConstructionCategory>> GetAllCategoriesAsync()
         {
             return await _db.ConstructionCategories.OrderBy(x => x.Code).ToListAsync();
@@ -64,7 +63,6 @@ namespace Construction_Expert.Services
         {
             category.Id = Guid.NewGuid();
             category.Code = await NextCodeAsync();
-
             category.IsRoot = !parentId.HasValue;
             category.IsLeaf = true;
 
@@ -90,7 +88,6 @@ namespace Construction_Expert.Services
 
             await _db.SaveChangesAsync();
         }
-
 
         public async Task<List<(ConstructionCategory Cat, int Level)>> GetFlatTreeAsync()
         {
@@ -121,6 +118,42 @@ namespace Construction_Expert.Services
             }
         }
 
-    }
+        public record CatPath(IReadOnlyList<ConstructionCategory> Nodes);
 
+        public async Task<List<CatPath>> GetLeafPathsAsync()
+        {
+            var cats = await _db.ConstructionCategories.ToListAsync();
+            var rels = await _db.ConstructionCategoryRelations.ToListAsync();
+
+            var lookup = rels.GroupBy(r => r.ParentCategoryId)
+                             .ToDictionary(
+                                 g => g.Key,
+                                 g => g.Select(r => cats.First(c => c.Id == r.CategoryId)).ToList()
+                             );
+
+            List<CatPath> paths = [];
+
+            void Walk(ConstructionCategory node, List<ConstructionCategory> stack)
+            {
+                stack.Add(node);
+
+                if (!lookup.ContainsKey(node.Id) || lookup[node.Id].Count == 0)
+                {
+                    paths.Add(new CatPath(stack.ToList()));
+                }
+                else
+                {
+                    foreach (var child in lookup[node.Id])
+                        Walk(child, stack);
+                }
+
+                stack.RemoveAt(stack.Count - 1);
+            }
+
+            foreach (var root in cats.Where(c => c.IsRoot).OrderBy(c => c.Code))
+                Walk(root, new List<ConstructionCategory>());
+
+            return paths;
+        }
+    }
 }

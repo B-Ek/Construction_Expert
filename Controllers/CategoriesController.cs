@@ -53,9 +53,10 @@ namespace Construction_Expert.Controllers
 
         public async Task<IActionResult> Hierarchy()
         {
-            var tree = await _svc.GetFlatTreeAsync();
-            return View(tree);
+            var paths = await _svc.GetLeafPathsAsync();
+            return View(paths);
         }
+
 
 
 

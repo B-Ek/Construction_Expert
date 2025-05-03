@@ -1,62 +1,78 @@
-﻿@using Construction_Expert.Models
-@model List<(ConstructionCategory Cat, int Level)>
+﻿@using System.Collections.Generic
+@using Construction_Expert.Models
+@using Construction_Expert.Services
+@model List<CategoryService.CatPath>
 
 @{
     ViewBag.Title = "Kategori Hiyerarşisi";
+    int maxLevel = Model.Any() ? Model.Max(p => p.Nodes.Count) : 0;
 }
-
-<style>
-    .grid-row {
-        display: grid;
-        grid-template-columns: repeat(10, 200px);
-    }
-</style>
-
 
 <h3 class="mb-3">Kategori Ağaç Yapısı</h3>
 
-<table class="table table-bordered align-middle">
+<table class="table table-bordered table-sm align-middle">
     <thead>
         <tr>
-            <th>Kategori</th>
-            <th>Kod</th>
-            <th>Alan (AreaId)</th>
-            <th>İşlemler</th>
+            @for (int i = 0; i < maxLevel; i++)
+            {
+                <th style="min-width:180px">Seviye @i</th>
+            }
+            <th style="min-width:140px">İşlem</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var (cat, level) in Model)
-        {
-            <tr>
-                <td>
-                    @for (int i = 0; i < level; i++)
-                    {
-                        <span style="display:inline-block;width:25px"></span>
-                    }
+        @{
+            var spanLeft = new Dictionary<Guid, int>();
 
-                    @if (cat.IsLeaf)
-                    {
-                        <i class="bi bi-dot"></i>
+            foreach (var path in Model)
+            {
+                <tr>
+                    @{
+                        for (int lvl = 0; lvl < maxLevel; lvl++)
+                        {
+                            if (lvl < path.Nodes.Count)
+                            {
+                                var cat = path.Nodes[lvl];
+
+                                if (spanLeft.TryGetValue(cat.Id, out int left) && left > 0)
+                                {
+                                    spanLeft[cat.Id] = left - 1;
+                                }
+                                else
+                                {
+                                    int rowspan = Model.Count(p =>
+                                    p.Nodes.Count > lvl &&
+                                    p.Nodes[lvl].Id == cat.Id);
+
+                                    if (rowspan > 1)
+                                        spanLeft[cat.Id] = rowspan - 1;
+
+                                    <td @(rowspan > 1 ? $"rowspan=\"{rowspan}\"" : "")>
+                                        @cat.Name - @cat.Code
+                                    </td>
+                                }
+                            }
+                            else
+                            {
+                                <td></td>
+                            }
+                        }
                     }
-                    else
-                    {
-                        <i class="bi bi-folder"></i>
-                    }
-                    @cat.Name
-                </td>
-                <td>@cat.Code</td>
-                <td>@cat.AreaId</td>
-                <td>
-                    <a asp-action="Create" asp-route-parentId="@cat.Id" class="btn btn-sm btn-primary">Alt Ekle</a>
-                    <a asp-action="Edit" asp-route-id="@cat.Id" class="btn btn-sm btn-secondary">Düzenle</a>
-                </td>
-            </tr>
+                    <td>
+                        <a asp-action="Create"
+                           asp-route-parentId="@path.Nodes.Last().Id"
+                           class="btn btn-sm btn-primary">
+                            Alt Ekle
+                        </a>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>
+
 <div class="mb-3 text-end">
     <a asp-action="Create" class="btn btn-outline-primary">
         <i class="bi bi-arrow-left-circle"></i> Kategoriye Dön
     </a>
 </div>
-
