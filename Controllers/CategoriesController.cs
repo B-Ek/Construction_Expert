@@ -57,6 +57,12 @@ namespace Construction_Expert.Controllers
             return View(paths);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _svc.DeleteCategoryAsync(id);
+            return RedirectToAction("Hierarchy");
+        }
 
 
 

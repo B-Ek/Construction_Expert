@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Construction_Expert.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
@@ -156,5 +157,19 @@ namespace Construction_Expert.Services
 
             return paths;
         }
+        public async Task DeleteCategoryAsync(Guid categoryId)
+        {
+            var category = await _db.ConstructionCategories.FindAsync(categoryId);
+            if (category == null) return;
+
+            var childRels = _db.ConstructionCategoryRelations.Where(r => r.ParentCategoryId == categoryId || r.CategoryId == categoryId);
+            _db.ConstructionCategoryRelations.RemoveRange(childRels);
+
+            _db.ConstructionCategories.Remove(category);
+
+            await _db.SaveChangesAsync();
+        }
+
+
     }
 }

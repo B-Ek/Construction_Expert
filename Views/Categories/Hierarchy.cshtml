@@ -3,6 +3,15 @@
 @using Construction_Expert.Services
 @model List<CategoryService.CatPath>
 
+
+<style>
+    body, table, th, td {
+        color: white !important;
+    }
+</style>
+
+
+
 @{
     ViewBag.Title = "Kategori Hiyerarşisi";
     int maxLevel = Model.Any() ? Model.Max(p => p.Nodes.Count) : 0;
@@ -69,7 +78,24 @@
     </tbody>
 </table>
 
-<div class="mb-3 text-end">
+<form asp-action="Delete" method="post">
+
+        <select name="id" class="form-select" required>
+            <option value="">-- Silinecek Kategori Seçin --</option>
+            @foreach (var path in Model)
+            {
+                var last = path.Nodes.Last();
+                <option value="@last.Id">@last.Name - @last.Code</option>
+            }
+        </select>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-danger px-4 py-2">Sil</button>
+    </div>
+
+</form>
+
+<div class="mb-3 text-end mt-3">
     <a asp-action="Create" class="btn btn-outline-primary">
         <i class="bi bi-arrow-left-circle"></i> Kategoriye Dön
     </a>
